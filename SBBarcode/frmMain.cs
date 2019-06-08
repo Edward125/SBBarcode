@@ -11,6 +11,8 @@ using AForge.Imaging;
 using AForge.Video;
 using AForge.Video.DirectShow;
 using System.Drawing.Imaging;
+using DTKBarReaderLib;
+using System.Runtime.InteropServices;
 
 
 namespace SBBarcode
@@ -21,6 +23,18 @@ namespace SBBarcode
         {
             InitializeComponent();
         }
+
+
+        [DllImport("DTKBarReader.dll", CharSet = CharSet.Unicode), PreserveSig]
+        private static extern int CreateBarcodeReader(ref BarcodeReader barReader);
+        [DllImport("DTKBarReader.dll", CharSet = CharSet.Unicode), PreserveSig]
+        private static extern int DestroyBarcodeReader(BarcodeReader barReader);
+
+        [DllImport("gdi32.dll")]
+        public static extern bool DeleteObject(IntPtr hObject);
+
+        BarcodeReader barReader = null;
+
 
 
         /// <summary>
@@ -76,12 +90,14 @@ namespace SBBarcode
             videoSourcePlayer1.Start();
             //这样就把摄像头的图像获取到了本地
             System.Threading.Thread.Sleep(500);
+            UpdateMsg(lstMsg, "Open cam.");
         }
 
         private void btnCloseCam_Click(object sender, EventArgs e)
         {
             videoSourcePlayer1.Stop();
             timerDelay.Stop();
+            UpdateMsg(lstMsg, "Close cam.");
 
         }
 
@@ -125,11 +141,168 @@ namespace SBBarcode
                 //创建图像对象
                 Bitmap bitmap = videoSourcePlayer1.GetCurrentVideoFrame();
                 //定义图片路径
-                string filename = "jietu.jpg";
+                string filename = DateTime.Now.ToString("yyyyMMddHHmmss") + ".jpg";
                 //创建图片
                 bitmap.Save(filename, ImageFormat.Jpeg);
                 picCapture.ImageLocation = filename;
+                UpdateMsg(lstMsg, "capture " + filename);
             }
+        }
+
+
+        private void UpdateMsg(ListBox listbox,string msg)
+        {
+
+            string item = DateTime.Now.ToString("HH:mm:ss") + "->" + msg;
+            listbox.Items.Add(item);
+            listbox.SelectedIndex = listbox.Items.Count - 1;
+            if (listbox.Items.Count >=100)
+                listbox.Items.RemoveAt(0);
+
+        }
+
+
+
+        /// <summary>
+        /// 条码识别
+        /// </summary>
+        private void ScanBarCode(string fileName)
+        {
+            DateTime now = DateTime.Now;
+            System.Drawing.Image primaryImage = System.Drawing.Image.FromFile(fileName);
+
+            Bitmap pImg = MakeGrayscale3((Bitmap)primaryImage);
+            using (ZBar.ImageScanner scanner = new ZBar.ImageScanner())
+            {
+                scanner.SetConfiguration(ZBar.SymbolType.None, ZBar.Config.Enable, 0);
+                scanner.SetConfiguration(ZBar.SymbolType.CODE39, ZBar.Config.Enable, 1);
+                scanner.SetConfiguration(ZBar.SymbolType.CODE128, ZBar.Config.Enable, 1);
+
+                List<ZBar.Symbol> symbols = new List<ZBar.Symbol>();
+                symbols = scanner.Scan((System.Drawing.Image)pImg);
+
+                if (symbols != null && symbols.Count > 0)
+                {
+                    string result = string.Empty;
+                    symbols.ForEach(s => result += "条码内容:" + s.Data + " 条码质量:" + s.Quality + Environment.NewLine);
+                  //  MessageBox.Show(result);
+
+                    foreach (ZBar.Symbol  sym in symbols)
+                    {
+                        UpdateMsg(lstMsg, "条码内容:" + sym.Data + " 条码质量:" + sym.Quality);
+                    }
+
+                  
+                    
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// 处理图片灰度
+        /// </summary>
+        /// <param name="original"></param>
+        /// <returns></returns>
+        private  Bitmap MakeGrayscale3(Bitmap original)
+        {
+            //create a blank bitmap the same size as original
+            Bitmap newBitmap = new Bitmap(original.Width, original.Height);
+
+            //get a graphics object from the new image
+            Graphics g = Graphics.FromImage(newBitmap);
+
+            //create the grayscale ColorMatrix
+            System.Drawing.Imaging.ColorMatrix colorMatrix = new System.Drawing.Imaging.ColorMatrix(
+               new float[][] 
+              {
+                 new float[] {.3f, .3f, .3f, 0, 0},
+                 new float[] {.59f, .59f, .59f, 0, 0},
+                 new float[] {.11f, .11f, .11f, 0, 0},
+                 new float[] {0, 0, 0, 1, 0},
+                 new float[] {0, 0, 0, 0, 1}
+              });
+
+            //create some image attributes
+            ImageAttributes attributes = new ImageAttributes();
+
+            //set the color matrix attribute
+            attributes.SetColorMatrix(colorMatrix);
+
+            //draw the original image on the new image
+            //using the grayscale color matrix
+            g.DrawImage(original, new Rectangle(0, 0, original.Width, original.Height),
+               0, 0, original.Width, original.Height, GraphicsUnit.Pixel, attributes);
+
+            //dispose the Graphics object
+            g.Dispose();
+            return newBitmap;
+        }
+
+        private void btnReadBarcode_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(txtImg.Text.Trim()))
+            {
+                ScanBarCode(txtImg.Text.Trim());
+
+                barReader = new BarcodeReader();
+                // set barcode types to read 
+                barReader.BarcodeTypes = BarcodeTypeEnum.BT_DataMatrix;
+                // define expected barcode orientations
+                barReader.BarcodeOrientation = BarcodeOrientationEnum.BO_All;
+                // the following values are default values (for TM_Multiple only)
+                // for example, if barReader.Threshold = 128, 
+                //      then the follwong thresholds will be used 64,80,96,112,128,144,160,176,192
+                barReader.ThresholdStep = 16;
+                barReader.ThresholdCount = 8;
+                barReader.ReadFromFile(txtImg.Text.Trim());
+
+
+                if (barReader.Barcodes.Count == 0)
+                    MessageBox.Show("No barcodes found");
+                else
+                {
+                    for (int i = 0; i < barReader.Barcodes.Count; i++)
+                    {
+                        Barcode barcode = barReader.Barcodes.get_Item(i);
+                        UpdateMsg(lstMsg, barcode.BarcodeString);
+
+                        //ListViewItem lvi = listView1.Items.Add(barcode.BarcodeString);
+
+                        //// Binary data of the barcode
+                        //byte[] binData = new byte[barcode.BarcodeDataLen];
+                        //Marshal.Copy(barcode.BarcodeData, binData, 0, barcode.BarcodeDataLen);
+                        //lvi.SubItems.Add("");
+                        //for (int j = 0; j < binData.Length; j++)
+                        //    lvi.SubItems[1].Text += binData[j].ToString() + " ";
+
+                        //// Page number
+                        //lvi.SubItems.Add(barcode.Page.ToString());
+
+                        //// Barcode type
+                        //lvi.SubItems.Add(barcode.Type.ToString());
+
+                        //// Barcode orientaion
+                        //lvi.SubItems.Add(barcode.Orientation.ToString());
+
+                        //// Barcode location 
+                        //lvi.SubItems.Add("(" + barcode.left.ToString() + ", " + barcode.top.ToString() + "),(" + barcode.right.ToString() + ", " + barcode.bottom.ToString() + ")");
+                    }
+                }
+
+            }
+
+        }
+
+        private void txtImg_DoubleClick(object sender, EventArgs e)
+        {
+            OpenFileDialog open = new OpenFileDialog();
+            if (open.ShowDialog() == DialogResult.OK)
+            {
+                txtImg.Text = open.FileName;
+                picCapture.Load(txtImg.Text.Trim());
+            }
+
         }
     }
 }
