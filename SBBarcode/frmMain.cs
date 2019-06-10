@@ -15,6 +15,7 @@ using DTKBarReaderLib;
 using System.Runtime.InteropServices;
 
 
+
 namespace SBBarcode
 {
     public partial class frmMain : Form
@@ -64,7 +65,13 @@ namespace SBBarcode
 
         }
 
+
         private void btnOpenCam_Click(object sender, EventArgs e)
+        {
+            OpenCam();
+        }
+
+        private void OpenCam()
         {
             //实例化过滤类
             //FilterCategory.VideoInputDevice视频输入设备类别。
@@ -83,7 +90,7 @@ namespace SBBarcode
             //使用。
             videoSource.VideoResolution = videoSource.VideoCapabilities[selectedDeviceIndex];
             //把实例化好的videosource类赋值到VideoSourcePlayer控件的VideoSource属性
-           // vspxianshi.VideoSource = videoSource;
+            // vspxianshi.VideoSource = videoSource;
             videoSourcePlayer1.VideoSource = videoSource;
             //启动VideoSourcePlayer控件
             //vspxianshi.Start();
@@ -91,14 +98,25 @@ namespace SBBarcode
             //这样就把摄像头的图像获取到了本地
             System.Threading.Thread.Sleep(500);
             UpdateMsg(lstMsg, "Open cam.");
+            btnCloseCam.Enabled = true;
+            btnOpenCam.Enabled = false;
+            btnCapturePic.Enabled = true;
         }
 
         private void btnCloseCam_Click(object sender, EventArgs e)
         {
+
+            CloseCam();
+        }
+
+        private void CloseCam()
+        {
             videoSourcePlayer1.Stop();
             timerDelay.Stop();
+            btnOpenCam.Enabled = true;
+            btnCloseCam.Enabled = false;
+            btnCapturePic.Enabled = false;
             UpdateMsg(lstMsg, "Close cam.");
-
         }
 
         private void timerDelay_Tick(object sender, EventArgs e)
@@ -258,6 +276,8 @@ namespace SBBarcode
                 barReader.ReadFromFile(txtImg.Text.Trim());
 
 
+
+
                 if (barReader.Barcodes.Count == 0)
                     MessageBox.Show("No barcodes found");
                 else
@@ -304,5 +324,32 @@ namespace SBBarcode
             }
 
         }
+
+        private void btnCapturePic_EnabledChanged(object sender, EventArgs e)
+        {
+            if (btnCapturePic.Enabled)
+                btnCapturePic.BackColor = Color.FromArgb(51, 153, 255);
+            else
+                btnCapturePic.BackColor = Color.Gray;
+        }
+
+        private void btnCloseCam_EnabledChanged(object sender, EventArgs e)
+        {
+            if (btnCloseCam.Enabled)
+                btnCloseCam.BackColor = Color.FromArgb(51, 153, 255);
+            else
+                btnCloseCam.BackColor = Color.Gray;
+        }
+
+        private void btnOpenCam_EnabledChanged(object sender, EventArgs e)
+        {
+            if (btnOpenCam.Enabled)
+                btnOpenCam.BackColor = Color.FromArgb(51, 153, 255);
+            else
+                btnOpenCam.BackColor = Color.Gray;
+        }
+
+
+
     }
 }
