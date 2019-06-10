@@ -65,9 +65,16 @@ namespace SBBarcode
         
         private void frmMain_Load(object sender, EventArgs e)
         {
+            this.Text = "Scan Mac(Code-128) & SN(DataMatrix),ver:" + Application.ProductVersion;
             btnCloseCam.Enabled = false;
             btnCapturePic.Enabled = false;
             txtImg.SetWatermark("Double Click here to select image file.");
+
+            if (!Directory.Exists("Pictures"))
+                Directory.CreateDirectory("Pictures");
+
+
+
             videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
             if (videoDevices.Count > 0)
             {
@@ -84,22 +91,29 @@ namespace SBBarcode
             }
 
 
-    
-
-
-
-
             DeleteLog();
             if (p.RunType == p.RunTypeFlag.Auto)
             {
-                OpenCam();
-                p.WriteLog("Auto Open Cam.");
-                System.Threading.Thread.Sleep(1500);
-                CapturePic();
-                CloseCam();
-                ReadBarcode();
-                System.Threading.Thread.Sleep(500);
-                p.WriteLog("Auto Run Exit.");
+                if (p.CamIndex > videoDevices.Count-1)
+                {
+                    p.WriteLog("Select Cam index(" + p.CamIndex.ToString() +") out of local cam index range (" + (videoDevices.Count -1).ToString () +").");
+                }
+                else
+                {
+                    comboCam.SelectedIndex = p.CamIndex;
+                    selectedDeviceIndex = p.CamIndex;
+
+                    OpenCam();
+                    p.WriteLog("Auto Open Cam.");
+                    System.Threading.Thread.Sleep(1500);
+                    CapturePic();
+                    CloseCam();
+                    ReadBarcode();
+                    System.Threading.Thread.Sleep(500);
+                    p.WriteLog("Auto Run Exit.");
+                }
+
+
                 Environment.Exit(0);
             }
 
@@ -209,11 +223,11 @@ namespace SBBarcode
                 //创建图像对象
                 Bitmap bitmap = videoSourcePlayer1.GetCurrentVideoFrame();
                 //定义图片路径
-                string filename = DateTime.Now.ToString("yyyyMMddHHmmss") + ".jpg";
+                string filename =   DateTime.Now.ToString("yyyyMMddHHmmss") + ".bmp";
                 //创建图片
-                bitmap.Save(filename, ImageFormat.Jpeg);
-                txtImg.Text = Environment.CurrentDirectory + @"\" + filename;
-                picCapture.ImageLocation = filename;
+                bitmap.Save(Environment.CurrentDirectory + @"\Pictures\" + filename, ImageFormat.Bmp);
+                txtImg.Text = Environment.CurrentDirectory + @"\Pictures\" + filename;
+                picCapture.ImageLocation = Environment.CurrentDirectory + @"\Pictures\" + filename;
                 UpdateMsg(lstMsg, "capture " + filename);
                 p.WriteLog("capture " + filename);
             }

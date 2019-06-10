@@ -18,6 +18,7 @@ namespace SBBarcode
 
 
         public static  RunTypeFlag RunType;
+        public static int CamIndex = 0;
         /// <summary>
         /// 
         /// </summary>

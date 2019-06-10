@@ -17,12 +17,20 @@ namespace SBBarcode
             Application.SetCompatibleTextRenderingDefault(false);
             if (args.Length > 0)
             {
-                if (args[0].ToLower() == "auto")
+
+                p.CamIndex = Convert.ToInt16(args[0]);
+                try
                 {
                     p.RunType = p.RunTypeFlag.Auto;
                     p.WriteLog("Auto Run");
                 }
+                catch (Exception ex)
+                {
 
+                    p.WriteLog("Cam Index Error." + ex.Message);
+                }
+
+             
 
             }
             else
