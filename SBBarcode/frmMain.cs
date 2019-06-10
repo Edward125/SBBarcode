@@ -13,6 +13,9 @@ using AForge.Video.DirectShow;
 using System.Drawing.Imaging;
 using DTKBarReaderLib;
 using System.Runtime.InteropServices;
+using Edward;
+using System.IO;
+
 
 
 
@@ -62,6 +65,43 @@ namespace SBBarcode
         
         private void frmMain_Load(object sender, EventArgs e)
         {
+            btnCloseCam.Enabled = false;
+            btnCapturePic.Enabled = false;
+            txtImg.SetWatermark("Double Click here to select image file.");
+            videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+            if (videoDevices.Count > 0)
+            {
+
+                for (int i = 0; i < videoDevices.Count ; i++)
+                {
+                    comboCam.Items.Add(videoDevices[i].Name);
+                }
+
+                comboCam.SelectedIndex = 0;
+                selectedDeviceIndex = 0;
+
+
+            }
+
+
+    
+
+
+
+
+            DeleteLog();
+            if (p.RunType == p.RunTypeFlag.Auto)
+            {
+                OpenCam();
+                p.WriteLog("Auto Open Cam.");
+                System.Threading.Thread.Sleep(1500);
+                CapturePic();
+                CloseCam();
+                ReadBarcode();
+                System.Threading.Thread.Sleep(500);
+                p.WriteLog("Auto Run Exit.");
+                Environment.Exit(0);
+            }
 
         }
 
@@ -69,15 +109,16 @@ namespace SBBarcode
         private void btnOpenCam_Click(object sender, EventArgs e)
         {
             OpenCam();
+            p.WriteLog("Manual Open Cam.");
         }
 
         private void OpenCam()
         {
             //实例化过滤类
             //FilterCategory.VideoInputDevice视频输入设备类别。
-            videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+          
             //实例化下标
-            selectedDeviceIndex = 0;
+            
             //实例化视频源抓取类
             //videoDevices[selectedDeviceIndex].MonikerString   过滤器的名字的字符串。
             videoSource = new VideoCaptureDevice(videoDevices[selectedDeviceIndex].MonikerString);//连接摄像头
@@ -101,12 +142,14 @@ namespace SBBarcode
             btnCloseCam.Enabled = true;
             btnOpenCam.Enabled = false;
             btnCapturePic.Enabled = true;
+            comboCam.Enabled = false;
         }
 
         private void btnCloseCam_Click(object sender, EventArgs e)
         {
 
             CloseCam();
+            p.WriteLog("Manual Close Cam.");
         }
 
         private void CloseCam()
@@ -116,6 +159,7 @@ namespace SBBarcode
             btnOpenCam.Enabled = true;
             btnCloseCam.Enabled = false;
             btnCapturePic.Enabled = false;
+            comboCam.Enabled = true;
             UpdateMsg(lstMsg, "Close cam.");
         }
 
@@ -150,6 +194,12 @@ namespace SBBarcode
 
         private void btnCapturePic_Click(object sender, EventArgs e)
         {
+            CapturePic();
+        }
+
+
+        private void CapturePic()
+        {
             if (videoSource == null)
             {
                 return;
@@ -162,11 +212,12 @@ namespace SBBarcode
                 string filename = DateTime.Now.ToString("yyyyMMddHHmmss") + ".jpg";
                 //创建图片
                 bitmap.Save(filename, ImageFormat.Jpeg);
+                txtImg.Text = Environment.CurrentDirectory + @"\" + filename;
                 picCapture.ImageLocation = filename;
                 UpdateMsg(lstMsg, "capture " + filename);
+                p.WriteLog("capture " + filename);
             }
         }
-
 
         private void UpdateMsg(ListBox listbox,string msg)
         {
@@ -208,6 +259,8 @@ namespace SBBarcode
                     foreach (ZBar.Symbol  sym in symbols)
                     {
                         UpdateMsg(lstMsg, "条码内容:" + sym.Data + " 条码质量:" + sym.Quality);
+                        p.WriteLog("MAC.txt", sym.Data);
+                       p. WriteLog("MAC:" + sym.Data + ",Quality:" + sym.Quality);
                     }
 
                   
@@ -259,6 +312,13 @@ namespace SBBarcode
 
         private void btnReadBarcode_Click(object sender, EventArgs e)
         {
+
+            ReadBarcode();
+        }
+
+
+        private void ReadBarcode()
+        {
             if (!string.IsNullOrEmpty(txtImg.Text.Trim()))
             {
                 ScanBarCode(txtImg.Text.Trim());
@@ -275,45 +335,21 @@ namespace SBBarcode
                 barReader.ThresholdCount = 8;
                 barReader.ReadFromFile(txtImg.Text.Trim());
 
-
-
-
                 if (barReader.Barcodes.Count == 0)
-                    MessageBox.Show("No barcodes found");
+                    UpdateMsg(lstMsg, "No barcodes found");
                 else
                 {
                     for (int i = 0; i < barReader.Barcodes.Count; i++)
                     {
                         Barcode barcode = barReader.Barcodes.get_Item(i);
                         UpdateMsg(lstMsg, barcode.BarcodeString);
-
-                        //ListViewItem lvi = listView1.Items.Add(barcode.BarcodeString);
-
-                        //// Binary data of the barcode
-                        //byte[] binData = new byte[barcode.BarcodeDataLen];
-                        //Marshal.Copy(barcode.BarcodeData, binData, 0, barcode.BarcodeDataLen);
-                        //lvi.SubItems.Add("");
-                        //for (int j = 0; j < binData.Length; j++)
-                        //    lvi.SubItems[1].Text += binData[j].ToString() + " ";
-
-                        //// Page number
-                        //lvi.SubItems.Add(barcode.Page.ToString());
-
-                        //// Barcode type
-                        //lvi.SubItems.Add(barcode.Type.ToString());
-
-                        //// Barcode orientaion
-                        //lvi.SubItems.Add(barcode.Orientation.ToString());
-
-                        //// Barcode location 
-                        //lvi.SubItems.Add("(" + barcode.left.ToString() + ", " + barcode.top.ToString() + "),(" + barcode.right.ToString() + ", " + barcode.bottom.ToString() + ")");
+                        p.WriteLog("SN.txt", barcode.BarcodeString);
+                        p.WriteLog("SN:" + barcode.BarcodeString);
                     }
                 }
 
             }
-
         }
-
         private void txtImg_DoubleClick(object sender, EventArgs e)
         {
             OpenFileDialog open = new OpenFileDialog();
@@ -350,6 +386,28 @@ namespace SBBarcode
         }
 
 
+
+
+
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void DeleteLog()
+        {
+
+            if (File.Exists("MAC.txt"))
+                File.Delete("MAC.txt");
+            if (File.Exists("SN.txt"))
+                File.Delete("SN.txt");
+
+        }
+
+        private void comboCam_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            selectedDeviceIndex = 0;
+        }
 
     }
 }

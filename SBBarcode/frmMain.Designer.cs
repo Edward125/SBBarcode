@@ -41,6 +41,8 @@
             this.btnCapturePic = new System.Windows.Forms.Button();
             this.btnReadBarcode = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.comboCam = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.picCapture)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -111,6 +113,8 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.label2);
+            this.panel1.Controls.Add(this.comboCam);
             this.panel1.Controls.Add(this.label1);
             this.panel1.Controls.Add(this.btnCloseCam);
             this.panel1.Controls.Add(this.btnOpenCam);
@@ -127,7 +131,7 @@
             this.btnCloseCam.BackColor = System.Drawing.SystemColors.Highlight;
             this.btnCloseCam.FlatAppearance.BorderSize = 0;
             this.btnCloseCam.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCloseCam.Location = new System.Drawing.Point(103, 4);
+            this.btnCloseCam.Location = new System.Drawing.Point(277, 4);
             this.btnCloseCam.Name = "btnCloseCam";
             this.btnCloseCam.Size = new System.Drawing.Size(69, 35);
             this.btnCloseCam.TabIndex = 10;
@@ -141,7 +145,7 @@
             this.btnOpenCam.BackColor = System.Drawing.SystemColors.Highlight;
             this.btnOpenCam.FlatAppearance.BorderSize = 0;
             this.btnOpenCam.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnOpenCam.Location = new System.Drawing.Point(19, 3);
+            this.btnOpenCam.Location = new System.Drawing.Point(193, 4);
             this.btnOpenCam.Name = "btnOpenCam";
             this.btnOpenCam.Size = new System.Drawing.Size(78, 35);
             this.btnOpenCam.TabIndex = 9;
@@ -163,9 +167,9 @@
             this.btnCapturePic.BackColor = System.Drawing.SystemColors.Highlight;
             this.btnCapturePic.FlatAppearance.BorderSize = 0;
             this.btnCapturePic.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCapturePic.Location = new System.Drawing.Point(178, 4);
+            this.btnCapturePic.Location = new System.Drawing.Point(352, 4);
             this.btnCapturePic.Name = "btnCapturePic";
-            this.btnCapturePic.Size = new System.Drawing.Size(115, 35);
+            this.btnCapturePic.Size = new System.Drawing.Size(106, 35);
             this.btnCapturePic.TabIndex = 11;
             this.btnCapturePic.Text = "Capture Picture";
             this.btnCapturePic.UseVisualStyleBackColor = false;
@@ -177,9 +181,9 @@
             this.btnReadBarcode.BackColor = System.Drawing.SystemColors.Highlight;
             this.btnReadBarcode.FlatAppearance.BorderSize = 0;
             this.btnReadBarcode.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnReadBarcode.Location = new System.Drawing.Point(299, 4);
+            this.btnReadBarcode.Location = new System.Drawing.Point(464, 4);
             this.btnReadBarcode.Name = "btnReadBarcode";
-            this.btnReadBarcode.Size = new System.Drawing.Size(115, 35);
+            this.btnReadBarcode.Size = new System.Drawing.Size(94, 35);
             this.btnReadBarcode.TabIndex = 13;
             this.btnReadBarcode.Text = "Read Barcode";
             this.btnReadBarcode.UseVisualStyleBackColor = false;
@@ -193,6 +197,24 @@
             this.label1.Size = new System.Drawing.Size(59, 12);
             this.label1.TabIndex = 14;
             this.label1.Text = "Img Path:";
+            // 
+            // comboCam
+            // 
+            this.comboCam.FormattingEnabled = true;
+            this.comboCam.Location = new System.Drawing.Point(49, 12);
+            this.comboCam.Name = "comboCam";
+            this.comboCam.Size = new System.Drawing.Size(138, 20);
+            this.comboCam.TabIndex = 15;
+            this.comboCam.SelectedIndexChanged += new System.EventHandler(this.comboCam_SelectedIndexChanged);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(14, 15);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(29, 12);
+            this.label2.TabIndex = 16;
+            this.label2.Text = "CAM:";
             // 
             // frmMain
             // 
@@ -225,6 +247,8 @@
         private System.Windows.Forms.Button btnCapturePic;
         private System.Windows.Forms.Button btnReadBarcode;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ComboBox comboCam;
+        private System.Windows.Forms.Label label2;
     }
 }
 
