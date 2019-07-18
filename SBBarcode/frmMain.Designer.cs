@@ -36,14 +36,14 @@
             this.lstMsg = new System.Windows.Forms.ListBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label2 = new System.Windows.Forms.Label();
+            this.comboCam = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.btnCloseCam = new System.Windows.Forms.Button();
             this.btnOpenCam = new System.Windows.Forms.Button();
             this.txtImg = new System.Windows.Forms.TextBox();
             this.btnCapturePic = new System.Windows.Forms.Button();
             this.btnReadBarcode = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.comboCam = new System.Windows.Forms.ComboBox();
-            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.picCapture)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -127,6 +127,33 @@
             this.panel1.Size = new System.Drawing.Size(561, 179);
             this.panel1.TabIndex = 14;
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(14, 15);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(29, 12);
+            this.label2.TabIndex = 16;
+            this.label2.Text = "CAM:";
+            // 
+            // comboCam
+            // 
+            this.comboCam.FormattingEnabled = true;
+            this.comboCam.Location = new System.Drawing.Point(49, 12);
+            this.comboCam.Name = "comboCam";
+            this.comboCam.Size = new System.Drawing.Size(138, 20);
+            this.comboCam.TabIndex = 15;
+            this.comboCam.SelectedIndexChanged += new System.EventHandler(this.comboCam_SelectedIndexChanged);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(14, 49);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(59, 12);
+            this.label1.TabIndex = 14;
+            this.label1.Text = "Img Path:";
+            // 
             // btnCloseCam
             // 
             this.btnCloseCam.BackColor = System.Drawing.SystemColors.Highlight;
@@ -189,33 +216,6 @@
             this.btnReadBarcode.Text = "Read Barcode";
             this.btnReadBarcode.UseVisualStyleBackColor = false;
             this.btnReadBarcode.Click += new System.EventHandler(this.btnReadBarcode_Click);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(14, 49);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(59, 12);
-            this.label1.TabIndex = 14;
-            this.label1.Text = "Img Path:";
-            // 
-            // comboCam
-            // 
-            this.comboCam.FormattingEnabled = true;
-            this.comboCam.Location = new System.Drawing.Point(49, 12);
-            this.comboCam.Name = "comboCam";
-            this.comboCam.Size = new System.Drawing.Size(138, 20);
-            this.comboCam.TabIndex = 15;
-            this.comboCam.SelectedIndexChanged += new System.EventHandler(this.comboCam_SelectedIndexChanged);
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(14, 15);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(29, 12);
-            this.label2.TabIndex = 16;
-            this.label2.Text = "CAM:";
             // 
             // frmMain
             // 

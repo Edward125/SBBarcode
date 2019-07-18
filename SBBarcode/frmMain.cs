@@ -268,17 +268,18 @@ namespace SBBarcode
                 {
                     string result = string.Empty;
                     symbols.ForEach(s => result += "条码内容:" + s.Data + " 条码质量:" + s.Quality + Environment.NewLine);
-                  //  MessageBox.Show(result);
+                    //  MessageBox.Show(result);
 
-                    foreach (ZBar.Symbol  sym in symbols)
+                    foreach (ZBar.Symbol sym in symbols)
                     {
                         UpdateMsg(lstMsg, "条码内容:" + sym.Data + " 条码质量:" + sym.Quality);
                         p.WriteLog("MAC.txt", sym.Data);
-                       p. WriteLog("MAC:" + sym.Data + ",Quality:" + sym.Quality);
+                        p.WriteLog("MAC:" + sym.Data + ",Quality:" + sym.Quality);
                     }
-
-                  
-                    
+                }
+                else
+                {
+                    UpdateMsg(lstMsg, "一维码读取失败.");
                 }
             }
         }
@@ -420,7 +421,7 @@ namespace SBBarcode
 
         private void comboCam_SelectedIndexChanged(object sender, EventArgs e)
         {
-            selectedDeviceIndex = 0;
+            selectedDeviceIndex = comboCam.SelectedIndex;
         }
 
     }
