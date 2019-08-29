@@ -44,6 +44,12 @@
             this.txtImg = new System.Windows.Forms.TextBox();
             this.btnCapturePic = new System.Windows.Forms.Button();
             this.btnReadBarcode = new System.Windows.Forms.Button();
+            this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
+            this.comboSP = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.btnRefreshPort = new System.Windows.Forms.Button();
+            this.btnOpenPort = new System.Windows.Forms.Button();
+            this.btnClosePort = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.picCapture)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -114,6 +120,11 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.btnClosePort);
+            this.panel1.Controls.Add(this.btnOpenPort);
+            this.panel1.Controls.Add(this.btnRefreshPort);
+            this.panel1.Controls.Add(this.label3);
+            this.panel1.Controls.Add(this.comboSP);
             this.panel1.Controls.Add(this.label2);
             this.panel1.Controls.Add(this.comboCam);
             this.panel1.Controls.Add(this.label1);
@@ -156,9 +167,9 @@
             // 
             // btnCloseCam
             // 
-            this.btnCloseCam.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnCloseCam.BackColor = System.Drawing.SystemColors.Control;
             this.btnCloseCam.FlatAppearance.BorderSize = 0;
-            this.btnCloseCam.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCloseCam.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnCloseCam.Location = new System.Drawing.Point(277, 4);
             this.btnCloseCam.Name = "btnCloseCam";
             this.btnCloseCam.Size = new System.Drawing.Size(69, 35);
@@ -170,9 +181,9 @@
             // 
             // btnOpenCam
             // 
-            this.btnOpenCam.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnOpenCam.BackColor = System.Drawing.SystemColors.Control;
             this.btnOpenCam.FlatAppearance.BorderSize = 0;
-            this.btnOpenCam.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnOpenCam.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnOpenCam.Location = new System.Drawing.Point(193, 4);
             this.btnOpenCam.Name = "btnOpenCam";
             this.btnOpenCam.Size = new System.Drawing.Size(78, 35);
@@ -192,9 +203,9 @@
             // 
             // btnCapturePic
             // 
-            this.btnCapturePic.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnCapturePic.BackColor = System.Drawing.SystemColors.Control;
             this.btnCapturePic.FlatAppearance.BorderSize = 0;
-            this.btnCapturePic.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCapturePic.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnCapturePic.Location = new System.Drawing.Point(352, 4);
             this.btnCapturePic.Name = "btnCapturePic";
             this.btnCapturePic.Size = new System.Drawing.Size(106, 35);
@@ -206,9 +217,9 @@
             // 
             // btnReadBarcode
             // 
-            this.btnReadBarcode.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnReadBarcode.BackColor = System.Drawing.SystemColors.Control;
             this.btnReadBarcode.FlatAppearance.BorderSize = 0;
-            this.btnReadBarcode.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnReadBarcode.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnReadBarcode.Location = new System.Drawing.Point(464, 4);
             this.btnReadBarcode.Name = "btnReadBarcode";
             this.btnReadBarcode.Size = new System.Drawing.Size(94, 35);
@@ -216,6 +227,66 @@
             this.btnReadBarcode.Text = "Read Barcode";
             this.btnReadBarcode.UseVisualStyleBackColor = false;
             this.btnReadBarcode.Click += new System.EventHandler(this.btnReadBarcode_Click);
+            // 
+            // serialPort1
+            // 
+            this.serialPort1.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialPort1_DataReceived);
+            // 
+            // comboSP
+            // 
+            this.comboSP.FormattingEnabled = true;
+            this.comboSP.Location = new System.Drawing.Point(89, 80);
+            this.comboSP.Name = "comboSP";
+            this.comboSP.Size = new System.Drawing.Size(121, 20);
+            this.comboSP.TabIndex = 17;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(13, 84);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(71, 12);
+            this.label3.TabIndex = 18;
+            this.label3.Text = "SerialPort:";
+            // 
+            // btnRefreshPort
+            // 
+            this.btnRefreshPort.BackColor = System.Drawing.SystemColors.Control;
+            this.btnRefreshPort.FlatAppearance.BorderSize = 0;
+            this.btnRefreshPort.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnRefreshPort.Location = new System.Drawing.Point(378, 72);
+            this.btnRefreshPort.Name = "btnRefreshPort";
+            this.btnRefreshPort.Size = new System.Drawing.Size(97, 35);
+            this.btnRefreshPort.TabIndex = 19;
+            this.btnRefreshPort.Text = "Refresh Port";
+            this.btnRefreshPort.UseVisualStyleBackColor = false;
+            this.btnRefreshPort.Click += new System.EventHandler(this.btnRefreshPort_Click);
+            // 
+            // btnOpenPort
+            // 
+            this.btnOpenPort.BackColor = System.Drawing.SystemColors.Control;
+            this.btnOpenPort.FlatAppearance.BorderSize = 0;
+            this.btnOpenPort.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnOpenPort.Location = new System.Drawing.Point(216, 72);
+            this.btnOpenPort.Name = "btnOpenPort";
+            this.btnOpenPort.Size = new System.Drawing.Size(73, 35);
+            this.btnOpenPort.TabIndex = 20;
+            this.btnOpenPort.Text = "Open Port";
+            this.btnOpenPort.UseVisualStyleBackColor = false;
+            this.btnOpenPort.Click += new System.EventHandler(this.btnOpenPort_Click);
+            // 
+            // btnClosePort
+            // 
+            this.btnClosePort.BackColor = System.Drawing.SystemColors.Control;
+            this.btnClosePort.FlatAppearance.BorderSize = 0;
+            this.btnClosePort.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnClosePort.Location = new System.Drawing.Point(295, 72);
+            this.btnClosePort.Name = "btnClosePort";
+            this.btnClosePort.Size = new System.Drawing.Size(77, 35);
+            this.btnClosePort.TabIndex = 21;
+            this.btnClosePort.Text = "Close Port";
+            this.btnClosePort.UseVisualStyleBackColor = false;
+            this.btnClosePort.Click += new System.EventHandler(this.btnClosePort_Click);
             // 
             // frmMain
             // 
@@ -251,6 +322,12 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox comboCam;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox comboSP;
+        private System.IO.Ports.SerialPort serialPort1;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button btnOpenPort;
+        private System.Windows.Forms.Button btnRefreshPort;
+        private System.Windows.Forms.Button btnClosePort;
     }
 }
 

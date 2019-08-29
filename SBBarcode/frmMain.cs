@@ -15,6 +15,7 @@ using DTKBarReaderLib;
 using System.Runtime.InteropServices;
 using Edward;
 using System.IO;
+using System.IO.Ports;
 
 
 
@@ -39,7 +40,8 @@ namespace SBBarcode
 
         BarcodeReader barReader = null;
 
-
+        public string SN = string.Empty;
+        public string MAC = string.Empty;
 
         /// <summary>
         /// 类别的一个列表看到AForge.Video.DirectShow.FilterCategory。
@@ -65,9 +67,11 @@ namespace SBBarcode
         
         private void frmMain_Load(object sender, EventArgs e)
         {
+            getSerialPort(comboSP);
             this.Text = "Scan Mac(Code-128) & SN(DataMatrix),ver:" + Application.ProductVersion;
             btnCloseCam.Enabled = false;
             btnCapturePic.Enabled = false;
+            btnClosePort.Enabled = false;
             txtImg.SetWatermark("Double Click here to select image file.");
 
             if (!Directory.Exists("Pictures"))
@@ -157,6 +161,9 @@ namespace SBBarcode
             btnOpenCam.Enabled = false;
             btnCapturePic.Enabled = true;
             comboCam.Enabled = false;
+
+            SN = string.Empty;
+            MAC = string.Empty;
         }
 
         private void btnCloseCam_Click(object sender, EventArgs e)
@@ -228,6 +235,8 @@ namespace SBBarcode
                 bitmap.Save(Environment.CurrentDirectory + @"\Pictures\" + filename, ImageFormat.Bmp);
                 txtImg.Text = Environment.CurrentDirectory + @"\Pictures\" + filename;
                 picCapture.ImageLocation = Environment.CurrentDirectory + @"\Pictures\" + filename;
+                //txtImg.Text = @"C:\Users\Administrator\Desktop\11.bmp";
+                //picCapture.ImageLocation = @"C:\Users\Administrator\Desktop\11.bmp";
                 UpdateMsg(lstMsg, "capture " + filename);
                 p.WriteLog("capture " + filename);
             }
@@ -275,6 +284,7 @@ namespace SBBarcode
                         UpdateMsg(lstMsg, "条码内容:" + sym.Data + " 条码质量:" + sym.Quality);
                         p.WriteLog("MAC.txt", sym.Data);
                         p.WriteLog("MAC:" + sym.Data + ",Quality:" + sym.Quality);
+                        MAC = sym.Data;
                     }
                 }
                 else
@@ -360,6 +370,7 @@ namespace SBBarcode
                         UpdateMsg(lstMsg, barcode.BarcodeString);
                         p.WriteLog("SN.txt", barcode.BarcodeString);
                         p.WriteLog("SN:" + barcode.BarcodeString);
+                        SN = barcode.BarcodeString;
                     }
                 }
 
@@ -424,5 +435,176 @@ namespace SBBarcode
             selectedDeviceIndex = comboCam.SelectedIndex;
         }
 
+
+        /// <summary>
+        /// 获取串口 
+        /// </summary>
+        /// <param name="combox"></param>
+        private void getSerialPort(ComboBox combox)
+        {
+            combox.Items.Clear();
+            combox.Text = string.Empty;
+            foreach (string sp in System.IO.Ports.SerialPort.GetPortNames())
+                combox.Items.Add(sp);
+
+            if (combox.Items.Count > 0)
+                combox.SelectedIndex = 0;
+
+
+        }
+
+        private void btnRefreshPort_Click(object sender, EventArgs e)
+        {
+            getSerialPort(comboSP);
+        }
+
+        private void btnOpenPort_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(comboSP.Text.Trim()))
+            {
+                UpdateMsg(lstMsg, "select a comport first please...");
+                return;
+            }
+
+            serialPort1.PortName = comboSP.Text.Trim();
+            try
+            {
+                serialPort1.Open();
+                UpdateMsg(lstMsg, serialPort1.PortName + " is open...");
+                btnOpenPort.Enabled = false;
+                btnClosePort.Enabled = true;
+                btnRefreshPort.Enabled = false;
+            }
+            catch (Exception ex)
+            {
+                UpdateMsg(lstMsg, serialPort1.PortName + " failed to open...");
+                UpdateMsg(lstMsg, ex.Message);
+            }
+        }
+
+        private void btnClosePort_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPort1.IsOpen)
+                    serialPort1.Close();
+                UpdateMsg(lstMsg, serialPort1.PortName + " is closed...");
+                btnOpenPort.Enabled = true;
+                btnClosePort.Enabled = false;
+                btnRefreshPort.Enabled = true;
+            }
+            catch (Exception ex)
+            {
+                UpdateMsg(lstMsg, serialPort1.PortName + " failed to  closed...");
+                UpdateMsg(lstMsg, ex.Message);
+            }
+        }
+
+        private void serialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            this.Invoke((EventHandler)(delegate
+            {
+                if (serialPort1.BytesToRead == 0)
+                    return;
+                Delay(50);
+                string result = string.Empty;
+
+                result = serialPort1.ReadExisting().Trim().ToUpper();
+                serialPort1.DiscardInBuffer();
+
+                UpdateMsg(lstMsg, "recevive:" + result);
+
+                if (result == "A")
+                {
+                    if (p.CamIndex > videoDevices.Count - 1)
+                    {
+                        p.WriteLog("Select Cam index(" + p.CamIndex.ToString() + ") out of local cam index range (" + (videoDevices.Count - 1).ToString() + ").");
+                    }
+                    else
+                    {
+                        comboCam.SelectedIndex = p.CamIndex;
+                        selectedDeviceIndex = p.CamIndex;
+
+                        OpenCam();
+                        p.WriteLog("Auto Open Cam.");
+                        System.Threading.Thread.Sleep(1500);
+                        CapturePic();
+                        CloseCam();
+                        ReadBarcode();
+                        System.Threading.Thread.Sleep(500);
+                        if (string.IsNullOrEmpty(SN))
+                        {
+                            UpdateMsg(lstMsg, "SN is empty...");
+                            serialPort1.DiscardOutBuffer();
+                            serialPort1.Write("SN");
+                            UpdateMsg(lstMsg, "Send SN");
+                        }
+                        else
+                        {
+                            serialPort1.DiscardOutBuffer();
+                            serialPort1.Write(SN);
+                            UpdateMsg(lstMsg, "Send " + SN);
+                        }
+                    }
+                }
+
+                if (result == "B")
+                {
+                    if (p.CamIndex > videoDevices.Count - 1)
+                    {
+                        p.WriteLog("Select Cam index(" + p.CamIndex.ToString() + ") out of local cam index range (" + (videoDevices.Count - 1).ToString() + ").");
+                    }
+                    else
+                    {
+                        comboCam.SelectedIndex = p.CamIndex;
+                        selectedDeviceIndex = p.CamIndex;
+
+                        OpenCam();
+                        p.WriteLog("Auto Open Cam.");
+                        System.Threading.Thread.Sleep(1500);
+                        CapturePic();
+                        CloseCam();
+                        ReadBarcode();
+                        System.Threading.Thread.Sleep(500);
+                        if (string.IsNullOrEmpty(MAC))
+                        {
+                            serialPort1.DiscardOutBuffer();
+                            UpdateMsg(lstMsg, "MAC is empty...");
+                            serialPort1.Write("AMC");
+                            UpdateMsg(lstMsg, "Send MAC");
+                        }
+                        else
+                        {
+                            serialPort1.DiscardOutBuffer();
+                            serialPort1.Write(MAC);
+                            UpdateMsg(lstMsg, "Send " + MAC);
+                        }
+ 
+                    }
+                }
+    
+
+
+            }));
+        }
+
+        #region 延時子程式
+
+        /// <summary>
+        /// 延時子程序
+        /// </summary>
+        /// <param name="interval">延時的時間，单位毫秒</param>
+        private void Delay(double interval)
+        {
+            DateTime time = DateTime.Now;
+            double span = interval * 10000;
+            while (DateTime.Now.Ticks - time.Ticks < span)
+            {
+                Application.DoEvents();
+            }
+
+        }
+
+        #endregion
     }
 }
